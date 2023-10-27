@@ -47,7 +47,7 @@ public class Main {
         sparseMatrix.matrixShowing();
         System.out.println();
         System.out.println();
-        sparseMatrix.removingItem(1,2);
+        sparseMatrix.removingItem(1, 2);
         System.out.println();
         System.out.println();
         sparseMatrix.sparseShowing();
@@ -58,6 +58,11 @@ public class Main {
         System.out.println();
         System.out.println(sparseMatrix.search(101));
         System.out.println(sparseMatrix.search(754));
+        System.out.println();
+        sparseMatrix.update(9,2,11);
+        sparseMatrix.matrixShowing();
+        System.out.println();
+        sparseMatrix.sparseShowing();
     }
 }
 
@@ -108,17 +113,28 @@ class SparseMatrix {
         int checkRow = 0;
         for (DoublyLinkedList<Integer> doublyLinkedLists : this.list) {
             if (row == checkRow) {
-                    doublyLinkedLists.remove(column);
+                doublyLinkedLists.remove(column);
             }
             checkRow++;
         }
     }
-    public boolean search(int value){
+
+    public boolean search(int value) {
         for (DoublyLinkedList<Integer> doublyLinkedLists : this.list) {
             if (doublyLinkedLists.search(value))
                 return true;
         }
         return false;
+    }
+
+    public void update(int row, int column, int newValue) {
+        int checkRow = 0;
+        for (DoublyLinkedList<Integer> doublyLinkedLists : this.list) {
+            if (row==checkRow) {
+                doublyLinkedLists.updating(column,newValue);
+                return;
+            } else checkRow++;
+        }
     }
 
 }
@@ -211,15 +227,14 @@ class DoublyLinkedList<E> {
 
     public void remove(int column) {
         Node<E> node = this.head;
-        while (true){
-            if (node.next.column==column){
-                Node<E>temp = node.next.next;
+        while (true) {
+            if (node.next.column == column) {
+                Node<E> temp = node.next.next;
                 node.setNext(node.next.next);
                 temp.setPrev(node);
                 size--;
                 return;
-            }
-            else node = node.next;
+            } else node = node.next;
         }
     }
 
@@ -330,14 +345,25 @@ class DoublyLinkedList<E> {
         }
         System.out.println();
     }
-    public boolean search(E value){
+
+    public boolean search(E value) {
         Node<E> current = this.getHead().next;
         while (current.data != null) {
-            if (current.data.equals(value)){
+            if (current.data.equals(value)) {
                 return true;
             }
             current = current.next;
         }
         return false;
+    }
+
+    public void updating(int column, E newValue) {
+        Node<E> current = this.getHead().next;
+        while (true) {
+            if (current.column == column) {
+                current.setData(newValue);
+                return;
+            } else current = current.next;
+        }
     }
 }
