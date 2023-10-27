@@ -59,10 +59,12 @@ public class Main {
         System.out.println(sparseMatrix.search(101));
         System.out.println(sparseMatrix.search(754));
         System.out.println();
-        sparseMatrix.update(9,2,11);
+        sparseMatrix.update(9, 2, 11);
         sparseMatrix.matrixShowing();
         System.out.println();
         sparseMatrix.sparseShowing();
+        sparseMatrix.savingDataMatrix("little.csv");
+        sparseMatrix.savingDataInSparseMatrix("gig.csv");
     }
 }
 
@@ -130,11 +132,29 @@ class SparseMatrix {
     public void update(int row, int column, int newValue) {
         int checkRow = 0;
         for (DoublyLinkedList<Integer> doublyLinkedLists : this.list) {
-            if (row==checkRow) {
-                doublyLinkedLists.updating(column,newValue);
+            if (row == checkRow) {
+                doublyLinkedLists.updating(column, newValue);
                 return;
             } else checkRow++;
         }
+    }
+
+    public void savingDataMatrix(String url) throws IOException {
+        FileWriter fileWriter = new FileWriter(url);
+        for (DoublyLinkedList<Integer> doublyLinkedLists : this.list) {
+            doublyLinkedLists.savingDataMatrix(columns, fileWriter);
+        }
+        fileWriter.close();
+    }
+
+    public void savingDataInSparseMatrix(String url) throws IOException {
+        int row = 0;
+        FileWriter fileWriter = new FileWriter(url);
+        for (DoublyLinkedList<Integer> doublyLinkedLists : this.list) {
+            doublyLinkedLists.savingDataInSparseMatrix(fileWriter,row);
+            row++;
+        }
+        fileWriter.close();
     }
 
 }
@@ -154,22 +174,6 @@ class DoublyLinkedList<E> {
             this.prev = p;
             this.next = n;
             this.data = e;
-        }
-
-        public int getColumn() {
-            return column;
-        }
-
-        public E getData() {
-            return data;
-        }
-
-        public Node<E> getNext() {
-            return next;
-        }
-
-        public Node<E> getPrev() {
-            return prev;
         }
 
         public void setData(E data) {
@@ -196,33 +200,8 @@ class DoublyLinkedList<E> {
         head.setNext(trailer);
     }
 
-    public int getSize() {
-        return size;
-    }
-
     public Node<E> getHead() {
         return head;
-    }
-
-    public Node<E> getTrailer() {
-        return trailer;
-    }
-
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
-    public E getFirst() {
-        if (isEmpty())
-            return null;
-        else return this.head.next.getData();
-    }
-
-    public E getLast() {
-        if (isEmpty())
-            return null;
-        else
-            return this.trailer.prev.getData();
     }
 
     public void remove(int column) {
@@ -245,35 +224,8 @@ class DoublyLinkedList<E> {
         size++;
     }
 
-   /* public E removeFirst() {
-        if (isEmpty())
-            return null;
-        else
-            return remove(head.next);
-    }*/
-
-   /* public E removeLast() {
-        if (isEmpty())
-            return null;
-        else return remove(trailer.prev);
-    }*/
-
-    public void addFirst(E data, int column) {
-        addBetween(data, column, head, head.next);
-    }
-
     public void addLast(E data, int column) {
         addBetween(data, column, trailer.prev, trailer);
-    }
-
-    public E getI(int i) {
-        Node<E> element = this.head.next;
-        for (int j = 0; j <= i; j++) {
-            if (i - j == 0)
-                break;
-            else element = element.next;
-        }
-        return element.data;
     }
 
     public void addI(int i, E e) {
@@ -284,46 +236,6 @@ class DoublyLinkedList<E> {
                 return;
             }
             node = node.next;
-        }
-    }
-
-    public E removeI(int i) {
-        Node<E> element = this.head.next;
-        Node<E> nextNode;
-        for (int j = 0; j < i; j++) {
-            if (i - j == 1) {
-                nextNode = element.next;
-                element.prev.setNext(nextNode);
-                nextNode.setPrev(element.prev);
-                size--;
-                return element.getData();
-            } else element = element.next;
-        }
-        return null;
-    }
-
-    public void insertionSort() {
-        Node<E> key = this.head.next.next;
-        Node<E> keyNext = key.next;
-        for (int i = 0; i < size; i++) {
-            Node<E> key1 = key.prev;
-            while (key1 != head && (int) key1.data > (int) key.data) {
-                if (key1.next == key) {
-                    key1.setNext(key.next);
-                    key.next.setPrev(key1);
-                }
-                key1 = key1.prev;
-            }
-            if (key.prev != key1) {
-                key.setNext(key1.next);
-                key1.next.setPrev(key);
-                key1.setNext(key);
-                key.setPrev(key1);
-            }
-            key = keyNext;
-            keyNext = keyNext.next;
-            if (key == trailer)
-                break;
         }
     }
 
@@ -364,6 +276,25 @@ class DoublyLinkedList<E> {
                 current.setData(newValue);
                 return;
             } else current = current.next;
+        }
+    }
+
+    public void savingDataMatrix(int columns, FileWriter fileWriter) throws IOException {
+        Node<E> current = this.getHead().next;
+        for (int j = 0; j < columns; j++) {
+            if (current.column != -2 && j == current.column) {
+                fileWriter.append(String.valueOf(current.data)).append(",");
+                current = current.next;
+            } else fileWriter.append(0 + ",");
+        }
+        fileWriter.append("\n");
+    }
+
+    public void savingDataInSparseMatrix(FileWriter fileWriter, int row) throws IOException {
+        Node<E> current = this.getHead().next;
+        while (current.data != null) {
+            fileWriter.append(row + "," + current.column + "," + current.data + "\n");
+            current = current.next;
         }
     }
 }
