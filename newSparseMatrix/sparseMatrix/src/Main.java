@@ -1,3 +1,5 @@
+import org.w3c.dom.Node;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -46,15 +48,17 @@ public class Main {
         sparseMatrix.insertValue(2, 4, 2);
         sparseMatrix.matrixShowing();
         System.out.println();
+        sparseMatrix.sparseShowing();
         System.out.println();
-        sparseMatrix.removingItem(1, 2);
+        System.out.println();
+        sparseMatrix.removingItem(3, 1);
         System.out.println();
         System.out.println();
         sparseMatrix.sparseShowing();
         System.out.println();
         System.out.println();
         sparseMatrix.matrixShowing();
-        System.out.println();
+/*        System.out.println();
         System.out.println();
         System.out.println(sparseMatrix.search(101));
         System.out.println(sparseMatrix.search(754));
@@ -64,7 +68,7 @@ public class Main {
         System.out.println();
         sparseMatrix.sparseShowing();
         sparseMatrix.savingDataMatrix("little.csv");
-        sparseMatrix.savingDataInSparseMatrix("gig.csv");
+        sparseMatrix.savingDataInSparseMatrix("gig.csv");*/
     }
 }
 
@@ -81,14 +85,12 @@ class SparseMatrix {
         for (int i = 0; i < rows; i++) {
             DoublyLinkedList<Integer> linkList = new DoublyLinkedList<>();
             for (int j = 0; j < columns; j++) {
-                if (matrix[i][j] != 0){
-                    linkList.addLastRow(matrix[i][j], j);
                 if (i == 0) {
                     DoublyLinkedList<Integer> linkListColumn = new DoublyLinkedList<>();
-                    linkListColumn.addLastColumn(linkList.getLastInRow());
                     listColumns.add(linkListColumn);
                 }
-                else
+                if (matrix[i][j] != 0) {
+                    linkList.addLastRow(matrix[i][j], i, j);
                     listColumns.get(j).addLastColumn(linkList.getLastInRow());
                 }
             }
@@ -111,18 +113,35 @@ class SparseMatrix {
     }
 
     public void insertValue(int row, int column, int value) {
-        if ()
-    }
-
-    public void removingItem(int row, int column) {
         int checkRow = 0;
         for (DoublyLinkedList<Integer> doublyLinkedLists : this.listRows) {
             if (row == checkRow) {
-                doublyLinkedLists.remove(column);
+                doublyLinkedLists.addI(row, column, value, this.listColumns);
+                break;
             }
             checkRow++;
         }
     }
+
+    public void removingItem(int row, int column) {
+        if (row < column) {
+            int checkRow = 0;
+            for (DoublyLinkedList<Integer> doublyLinkedLists : this.listRows) {
+                if (row == checkRow) {
+                    doublyLinkedLists.removeI(column);
+                }
+                checkRow++;
+            }
+        } else {
+            int checkColumn = 0;
+        for (DoublyLinkedList<Integer> doublyLinkedLists : this.listColumns) {
+            if (column == checkColumn) {
+                doublyLinkedLists.removeJ(row);
+            }
+            checkColumn++;
+        }
+    }
+}
 
     public boolean search(int value) {
         for (DoublyLinkedList<Integer> doublyLinkedLists : this.listRows) {
@@ -173,9 +192,11 @@ class DoublyLinkedList<E> {
         private Node<E> prevColumn;
         private Node<E> nextColumnNode;
         private Node<E> nextRowNode;
+        private int row;
 
-        public Node(E data, int column, Node<E> prevRow, Node<E> prevColumn, Node<E> nextColumnNode, Node<E> nextRowNode) {
+        public Node(E data, int row, int column, Node<E> prevRow, Node<E> prevColumn, Node<E> nextColumnNode, Node<E> nextRowNode) {
             this.data = data;
+            this.row = row;
             this.column = column;
             this.prevRow = prevRow;
             this.nextRowNode = nextRowNode;
@@ -208,16 +229,17 @@ class DoublyLinkedList<E> {
     private Node<E> head;
     private Node<E> trailer;
 
+
     public DoublyLinkedList() {
-        head = new Node<>(null, -1, null, null, null, null);
-        trailer = new Node<>(null, -2, head, null, null, null);
+        head = new Node<>(null, -1, -1, null, null, null, null);
+        trailer = new Node<>(null, -2, -2, head, head, null, null);
         size = 0;
         head.setNextRowNode(trailer);
         head.setNextColumnNode(trailer);
     }
 
     public Node<E> getLastInRow() {
-        return head.prevRow;
+        return trailer.prevRow;
     }
 
     public Node<E> getLastInColumn() {
@@ -228,48 +250,86 @@ class DoublyLinkedList<E> {
         return head;
     }
 
-    public void remove(int column) {
+    public void removeI(int column) {
         Node<E> node = this.head;
         while (true) {
-            if (node.next.column == column) {
-                Node<E> temp = node.next.next;
-                node.setNext(node.next.next);
-                temp.setPrev(node);
+            if (node.nextRowNode.column == column) {
+                Node<E> temp = node.nextRowNode.nextRowNode;
+                Node<E> temp1 = node.nextRowNode;
+                Node<E> temp2 = node.nextRowNode.nextColumnNode;
+                node.setNextRowNode(node.nextRowNode.nextRowNode);
+                temp.setPrevRow(node);
+                temp1.prevColumn.setNextColumnNode(temp2);
+                temp2.setPrevColumn(temp1.prevColumn);
                 size--;
                 return;
-            } else node = node.next;
+            } else node = node.nextRowNode;
         }
     }
 
-    public void addBetweenRow(E data, int column, Node<E> previous, Node<E> next) {
-        Node<E> newNode = new Node<>(data, column, previous, null, null, next);
+    public void removeJ(int row) {
+        Node<E> node = this.head;
+        while (true) {
+            if (node.nextColumnNode.row == row) {
+                Node<E> temp2 = node.nextColumnNode;
+                Node<E> temp = node.nextColumnNode.nextRowNode;
+                node.setNextColumnNode(temp2.nextColumnNode);
+                temp2.nextColumnNode.setPrevColumn(node);
+                //Node<E> temp1 = node.nextColumnNode.nextRowNode;
+                temp.setPrevRow(temp2.prevRow);
+                temp2.prevRow.setNextRowNode(temp);
+                size--;
+                return;
+            } else node = node.nextColumnNode;
+        }
+    }
+
+    public Node<E> addBetweenRow(E data, int row, int column, Node<E> previous, Node<E> next) {
+        Node<E> newNode = new Node<>(data, row, column, previous, null, null, next);
         previous.setNextRowNode(newNode);
         next.setPrevRow(newNode);
         size++;
+        return newNode;
     }
 
     public void addBetweenColumn(Node<E> newNode, Node<E> previous, Node<E> next) {
         newNode.setNextColumnNode(next);
         newNode.setPrevColumn(previous);
-
+        previous.setNextColumnNode(newNode);
+        next.setPrevColumn(newNode);
     }
 
-    public void addLastRow(E data, int column) {
-        addBetweenRow(data, column, trailer.prevRow, trailer);
+    public void addLastRow(E data, int row, int column) {
+        addBetweenRow(data, row, column, trailer.prevRow, trailer);
     }
 
     public void addLastColumn(Node<E> newNode) {
-        addBetweenColumn(newNode,trailer.prevColumn,trailer);
+        addBetweenColumn(newNode, trailer.prevColumn, trailer);
     }
 
-    public void addI(int i, E e) {
+    public void addI(int i, int j, E e, ArrayList<DoublyLinkedList<E>> listColumn) {
+        Node<E> tempAdd;
         Node<E> node = this.head;
         while (true) {
-            if (i < node.next.column || node.next.column == -2) {
-                addBetween(e, i, node, node.next);
-                return;
+            if (j < node.nextRowNode.column || node.nextRowNode.column == -2) {
+                tempAdd = addBetweenRow(e, i, j, node, node.nextRowNode);
+                break;
             }
-            node = node.next;
+            node = node.nextRowNode;
+        }
+        int checkColumn = 0;
+        for (DoublyLinkedList<E> doublyLinkedLists : listColumn) {
+            if (j == checkColumn) {
+                Node<E> node1 = doublyLinkedLists.head;
+                while (true) {
+                    if (tempAdd.row < node1.nextColumnNode.row || node1.nextColumnNode.row == -2) {
+                        addBetweenColumn(tempAdd, node1, node1.nextColumnNode);
+                        return;
+                    }
+                    node1 = node1.nextColumnNode;
+                }
+            }
+            checkColumn++;
         }
     }
 
@@ -293,23 +353,23 @@ class DoublyLinkedList<E> {
     }
 
     public boolean search(E value) {
-        Node<E> current = this.getHead().next;
+        Node<E> current = this.getHead().nextRowNode;
         while (current.data != null) {
             if (current.data.equals(value)) {
                 return true;
             }
-            current = current.next;
+            current = current.nextRowNode;
         }
         return false;
     }
 
     public void updating(int column, E newValue) {
-        Node<E> current = this.getHead().next;
+        Node<E> current = this.getHead().nextRowNode;
         while (true) {
             if (current.column == column) {
                 current.setData(newValue);
                 return;
-            } else current = current.next;
+            } else current = current.nextRowNode;
         }
     }
 
