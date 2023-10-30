@@ -58,12 +58,12 @@ public class Main {
         System.out.println();
         System.out.println();
         sparseMatrix.matrixShowing();
-/*        System.out.println();
+      System.out.println();
         System.out.println();
         System.out.println(sparseMatrix.search(101));
         System.out.println(sparseMatrix.search(754));
         System.out.println();
-        sparseMatrix.update(9, 2, 11);
+/*        sparseMatrix.update(9, 2, 11);
         sparseMatrix.matrixShowing();
         System.out.println();
         sparseMatrix.sparseShowing();
