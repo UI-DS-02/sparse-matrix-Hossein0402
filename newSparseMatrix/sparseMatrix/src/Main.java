@@ -58,17 +58,17 @@ public class Main {
         System.out.println();
         System.out.println();
         sparseMatrix.matrixShowing();
-      System.out.println();
+        System.out.println();
         System.out.println();
         System.out.println(sparseMatrix.search(101));
         System.out.println(sparseMatrix.search(754));
         System.out.println();
-/*        sparseMatrix.update(9, 2, 11);
+        sparseMatrix.update(9, 2, 11);
         sparseMatrix.matrixShowing();
         System.out.println();
         sparseMatrix.sparseShowing();
         sparseMatrix.savingDataMatrix("little.csv");
-        sparseMatrix.savingDataInSparseMatrix("gig.csv");*/
+        sparseMatrix.savingDataInSparseMatrix("gig.csv");
     }
 }
 
@@ -124,7 +124,7 @@ class SparseMatrix {
     }
 
     public void removingItem(int row, int column) {
-        if (row < column) {
+        if (row <= column) {
             int checkRow = 0;
             for (DoublyLinkedList<Integer> doublyLinkedLists : this.listRows) {
                 if (row == checkRow) {
@@ -134,14 +134,14 @@ class SparseMatrix {
             }
         } else {
             int checkColumn = 0;
-        for (DoublyLinkedList<Integer> doublyLinkedLists : this.listColumns) {
-            if (column == checkColumn) {
-                doublyLinkedLists.removeJ(row);
+            for (DoublyLinkedList<Integer> doublyLinkedLists : this.listColumns) {
+                if (column == checkColumn) {
+                    doublyLinkedLists.removeJ(row);
+                }
+                checkColumn++;
             }
-            checkColumn++;
         }
     }
-}
 
     public boolean search(int value) {
         for (DoublyLinkedList<Integer> doublyLinkedLists : this.listRows) {
@@ -152,12 +152,22 @@ class SparseMatrix {
     }
 
     public void update(int row, int column, int newValue) {
-        int checkRow = 0;
-        for (DoublyLinkedList<Integer> doublyLinkedLists : this.listRows) {
-            if (row == checkRow) {
-                doublyLinkedLists.updating(column, newValue);
-                return;
-            } else checkRow++;
+        if (row <= column) {
+            int checkRow = 0;
+            for (DoublyLinkedList<Integer> doublyLinkedLists : this.listRows) {
+                if (row == checkRow) {
+                    doublyLinkedLists.updating(column, newValue);
+                    return;
+                } else checkRow++;
+            }
+        } else {
+            int checkColumn = 0;
+            for (DoublyLinkedList<Integer> doublyLinkedLists : this.listColumns) {
+                if (column == checkColumn) {
+                    doublyLinkedLists.updatingFromColumn(row, newValue);
+                    return;
+                } else checkColumn++;
+            }
         }
     }
 
@@ -370,6 +380,15 @@ class DoublyLinkedList<E> {
                 current.setData(newValue);
                 return;
             } else current = current.nextRowNode;
+        }
+    }
+    public void updatingFromColumn(int row, E newValue) {
+        Node<E> current = this.getHead().nextColumnNode;
+        while (true) {
+            if (current.row == row) {
+                current.setData(newValue);
+                return;
+            } else current = current.nextColumnNode;
         }
     }
 
